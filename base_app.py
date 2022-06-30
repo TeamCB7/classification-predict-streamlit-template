@@ -53,6 +53,7 @@ raw = pd.read_csv("resources/train.csv")
 raw.head()
 
 # Splitting Data
+X = raw.message.values
 y = raw.sentiment.values
 
 def load_prediction_models(model_file):
@@ -79,7 +80,7 @@ def main():
 	if selection == "Information":
 		st.info("General Information")
 		# You can read a markdown file from supporting resources folder
-		st.markdown("In this app we will be classifying twitter sentiments around climate change")
+		st.markdown("In this app we will be classifying twitter sentiments around climate change. For the sake of transparency we have shared the data upon which our algorithms have train ")
 
 		st.subheader("Raw Twitter data and label")
 		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
@@ -103,23 +104,17 @@ def main():
 			# Transforming user input with vectorizer
 			vect_text = tweet_cv.transform([tweet_text]).toarray()
 			if model_choice == 'LogisticRegression':
-				predictor = load_prediction_models("resources/log_reg.pkl")
-				prediction_fit = predictor.fit(vect_text)
+				predictor = load_prediction_models("resources/log_reg_pickle_final.pkl")
 				prediction = predictor.predict(vect_text)
 				# st.write(prediction)
 			elif model_choice == 'Linear SVC':
-				predictor = load_prediction_models("resources/lsvc.pkl")
-				prediction_fit = predictor.fit(vect_text)
+				predictor = load_prediction_models("resources/lsvc_pickle_final.pkl")
 				prediction = predictor.predict(vect_text)
 
 			final_result = get_key(prediction,prediction_labels)
 			st.success("Text Categorized as:: {}".format(final_result))
 			# Load your .pkl file with the model of your choice + make predictions
 			# Try loading in multiple models to give the user a choice
-			predictor = joblib.load(open(os.path.join("resources/log_reg.pkl"),"rb"))
-			predictor_fit = predictor.fit(X_train, y_train)
-			prediction_fit = predictor_fit.predict(vect_text)
-			
 
 			# When model has successfully run, will print prediction
 			# You can use a dictionary or similar structure to make this output
@@ -163,6 +158,9 @@ def main():
 			plt.axis("off")
 			st.pyplot()
 		st.set_option('deprecation.showPyplotGlobalUse', False)
+
+
+
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
 	main()
