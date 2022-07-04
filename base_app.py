@@ -23,43 +23,38 @@
 """
 # Streamlit dependencies
 import streamlit as st
-import joblib,os
+import joblib
+import os
 
 # Data dependencies
 import pandas as pd
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 import streamlit as st
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import plotly.express as px
 from wordcloud import WordCloud, STOPWORDS
 import numpy as np
 import spacy
-nlp = spacy.load("en_core_web_sm")
-
 
 # Vectorizer
-news_vectorizer = open("resources/vectorizer.pkl","rb")
+news_vectorizer = open("resources/vectorizer (2).pkl","rb")
 tweet_cv = joblib.load(news_vectorizer) # loading your vectorizer from the pkl file
 
 # Load your raw data
 raw = pd.read_csv("resources/train.csv")
 raw.head()
 
-# Splitting Data
-X = raw.message.values
-y = raw.sentiment.values
-
+# Load model from path
 def load_prediction_models(model_file):
 	loaded_model = joblib.load(open(os.path.join(model_file),"rb"))
 	return loaded_model
 
+# Get the Keys
+def get_key(val,my_dict):
+	for key,value in my_dict.items():
+		if val == value:
+			return key
 
 # The main function where we will build the actual app
 def main():
@@ -80,7 +75,7 @@ def main():
 	if selection == "Information":
 		st.info("General Information")
 		# You can read a markdown file from supporting resources folder
-		st.markdown("In this app we will be classifying twitter sentiments around climate change. For the sake of transparency we have shared the data upon which our algorithms have train ")
+		st.markdown("In this app we will be classifying twitter sentiments around climate change. For the sake of transparency we have shared the data upon which our algorithms have trained ")
 
 		st.subheader("Raw Twitter data and label")
 		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
@@ -92,33 +87,33 @@ def main():
 		st.info("Prediction with ML Models")
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","Type Here")
-		all_ml_models = ["LogisticRegression","Linear SVC"]
+		all_ml_models = ["LogisticRegression","XGB","Linear SVC"]
 		model_choice = st.selectbox("Select Model",all_ml_models)
 
 		prediction_labels = {'negative': -1,'neutral': 0,'positive': 1,'news': 2}
-
-
-
+			# Load your .pkl file with the model of your choice + make predictions
+			# Try loading in multiple models to give the user a choice
 		if st.button("Classify"):
 			st.text("Original Text::\n{}".format(tweet_text))
 			# Transforming user input with vectorizer
 			vect_text = tweet_cv.transform([tweet_text]).toarray()
 			if model_choice == 'LogisticRegression':
-				predictor = load_prediction_models("resources/log_reg_pickle_final.pkl")
+				predictor = load_prediction_models("resources/log_reg (2).pkl")
 				prediction = predictor.predict(vect_text)
 				# st.write(prediction)
+
+			elif model_choice == 'XGB':
+				predictor = load_prediction_models("resources/xgb.pkl")
+				prediction = predictor.predict(vect_text)
+			
 			elif model_choice == 'Linear SVC':
-				predictor = load_prediction_models("resources/lsvc_pickle_final.pkl")
+				predictor = load_prediction_models("resources/svc.pkl")
 				prediction = predictor.predict(vect_text)
 
 			final_result = get_key(prediction,prediction_labels)
 			st.success("Text Categorized as:: {}".format(final_result))
-			# Load your .pkl file with the model of your choice + make predictions
-			# Try loading in multiple models to give the user a choice
 
 			# When model has successfully run, will print prediction
-			# You can use a dictionary or similar structure to make this output
-			# more human interpretable.
 			st.success("Text Categorized as: {}".format(prediction))
 	
 	if selection == 'NLP':
@@ -157,7 +152,6 @@ def main():
 			plt.imshow(wordcloud,interpolation='bilinear')
 			plt.axis("off")
 			st.pyplot()
-		st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
 
