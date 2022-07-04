@@ -90,7 +90,7 @@ def main():
 		all_ml_models = ["LogisticRegression","XGB","Linear SVC"]
 		model_choice = st.selectbox("Select Model",all_ml_models)
 
-		prediction_labels = {'negative': -1,'neutral': 0,'positive': 1,'news': 2}
+		prediction_labels = {'Climate Change Denier': -1,'Neutral': 0,'Climate Change Believer': 1,'News': 2}
 			# Load your .pkl file with the model of your choice + make predictions
 			# Try loading in multiple models to give the user a choice
 		if st.button("Classify"):
